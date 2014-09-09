@@ -3,8 +3,6 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -140,7 +138,6 @@ public class MainFrame extends JFrame
 		mainPanel.add(eastPanel);
 
 		this.setResizable(true);
-		this.addComponentListener(new SizeListener());
 		this.add(mainPanel);
 	}	//end initComponents
 
@@ -451,13 +448,4 @@ public class MainFrame extends JFrame
 			return retVal;
 		}	//end convertTime
 	}	//end ButtonListener
-	
-	private class SizeListener extends ComponentAdapter
-	{
-		public void componentResized(ComponentEvent e) 
-		{
-			System.out.println("Width: " + currFrame.getWidth());
-			System.out.println("Height: " + currFrame.getHeight());
-		}	//end componentResized	
-	}	//end SizeListener
 }	//end MainFrame
