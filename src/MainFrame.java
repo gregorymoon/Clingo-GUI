@@ -26,23 +26,13 @@ public class MainFrame extends JFrame
 	private JPanel mainPanel, eastPanel, westPanel, southeastPanel, 
 	southeastCenterPanel, northeastPanel;
 
-	public MainFrame() throws IOException
+	public MainFrame(String ver)
 	{		
 		initComponents();
 
-		this.setTitle("Clingo GUI - " + getClingoVer());
+		this.setTitle("Clingo GUI - " + ver);
 		this.setSize(750, 750);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-	
-	private String getClingoVer() throws IOException
-	{
-		String[] commands = {"clingo", "--version"};
-		ProcessBuilder pb = new ProcessBuilder(commands);
-		Process proc = pb.start();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-		String ver = reader.readLine();
-		return ver;
 	}
 	
 	private void initComponents()
@@ -62,6 +52,7 @@ public class MainFrame extends JFrame
 		executeButton.addActionListener(bListener);
 
 		outputArea = new JTextArea();
+		outputArea.setLineWrap(true);
 		outputArea.setEditable(false);
 
 		codeArea = new JTextArea();
@@ -133,8 +124,8 @@ public class MainFrame extends JFrame
 					
 					while((line = br.readLine()) != null)
 					{
-						if(lineNum > 2)
-							outputString += line + "\n";
+						outputString += line + "\n";
+						
 						outputArea.setText(outputString);
 						
 						lineNum += 1;
