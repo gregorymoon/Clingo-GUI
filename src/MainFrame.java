@@ -33,8 +33,9 @@ public class MainFrame extends JFrame
 	private JLabel notificationLabel;
 	private JTextField numSolutionsField;
 	private JFrame currFrame;
-	private File currFile;
-	private JButton executeButton, saveFileButton, clearCodeAreaButton;
+	private File currFile, tempFile;
+	private JButton executeButton, saveFileAsButton, clearCodeAreaButton,
+	saveOutputButton, openExistingFileButton, saveFileButton;
 	private JTextArea codeArea, outputArea;
 	private JPanel mainPanel, eastPanel, westPanel, southeastPanel, 
 	southeastCenterPanel, northeastPanel;
@@ -52,8 +53,18 @@ public class MainFrame extends JFrame
 	{
 		ButtonListener bListener = new ButtonListener();
 
+		tempFile = null;
 		currFile = null;
 		currFrame = this;
+
+		saveFileButton = new JButton("Save File");
+		saveFileButton.addActionListener(bListener);
+		
+		openExistingFileButton = new JButton("Open Existing File");
+		openExistingFileButton.addActionListener(bListener);
+
+		saveOutputButton = new JButton("Save Output");
+		saveOutputButton.addActionListener(bListener);
 
 		notificationLabel = new JLabel();
 		notificationLabel.setForeground(Color.red);
@@ -66,8 +77,8 @@ public class MainFrame extends JFrame
 		clearCodeAreaButton = new JButton("Clear Code");
 		clearCodeAreaButton.addActionListener(bListener);
 
-		saveFileButton = new JButton("Save File");
-		saveFileButton.addActionListener(bListener);
+		saveFileAsButton = new JButton("Save File As...");
+		saveFileAsButton.addActionListener(bListener);
 
 		executeButton = new JButton("Execute");
 		executeButton.addActionListener(bListener);
@@ -89,15 +100,18 @@ public class MainFrame extends JFrame
 		southeastCenterPanel.add(new JLabel("Number of Solutions:"));
 		southeastCenterPanel.add(numSolutionsField);
 		southeastCenterPanel.add(executeButton);
+		southeastCenterPanel.add(saveFileAsButton);
 		southeastCenterPanel.add(saveFileButton);
+		southeastCenterPanel.add(saveOutputButton);
+		southeastCenterPanel.add(openExistingFileButton);
 		southeastCenterPanel.add(clearCodeAreaButton);
-		southeastCenterPanel.add(notificationLabel);
 
 		southeastPanel = new JPanel();
 		southeastPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		southeastPanel.setLayout(new BorderLayout());
 		southeastPanel.add(new JLabel("Controls:"), BorderLayout.NORTH);
 		southeastPanel.add(southeastCenterPanel, BorderLayout.CENTER);
+		southeastPanel.add(notificationLabel, BorderLayout.SOUTH);
 
 		northeastPanel = new JPanel();
 		northeastPanel.setLayout(new BorderLayout());
@@ -127,12 +141,10 @@ public class MainFrame extends JFrame
 
 			if(source.equals(executeButton))
 				executeCode();
+			else if(source.equals(saveFileAsButton))
+				saveFileAs();
 			else if(source.equals(saveFileButton))
-			{
-				JFileChooser fc = new JFileChooser();
-
-				fc.showSaveDialog(currFrame);
-			}
+				saveFile();
 			else if(source.equals(clearCodeAreaButton))
 			{
 				currFile = null;
@@ -140,6 +152,46 @@ public class MainFrame extends JFrame
 			}
 		}	//end actionPerformed
 
+		private void saveFile()
+		{
+			FileWriter fw;
+			try 
+			{
+				if(currFile == null || currFile == tempFile)
+				{
+					currFile = new File(System.getProperty("user.home") + File.separator
+							+ "Desktop" + File.separator + "temp.txt");
+					fw = new FileWriter(currFile);
+				}
+				
+				fw = new FileWriter(currFile);
+
+				fw.write(codeArea.getText());
+				fw.close();
+				
+				notificationLabel.setText("<html>Saved to:<br>" + currFile.getPath() + "<br>successfully.</html>");
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				notificationLabel.setText("<html>Unable to save to<br>" + currFile.getPath() + "<br>successfully.</html>");
+			}
+		}	//end saveFile
+		
+		private void saveFileAs()
+		{
+			JFileChooser fc = new JFileChooser();
+
+			if(currFile == null)
+				fc.setSelectedFile(new File("temp.txt"));
+			else
+				fc.setSelectedFile(currFile);
+
+			if(fc.showSaveDialog(currFrame) == JFileChooser.APPROVE_OPTION)
+			{
+				currFile = fc.getSelectedFile();	
+				saveFile();
+			}
+		}	//end saveFileAs
+		
 		private void executeCode()
 		{
 			int numAnswers;
@@ -159,14 +211,15 @@ public class MainFrame extends JFrame
 			ProcessBuilder pb = null;
 			Process proc = null;
 			BufferedWriter writer = null;
-			File tempFile = null;
 
 			try 
 			{
-				tempFile = File.createTempFile("temp", ".lp");
+				tempFile = File.createTempFile("temp", ".txt");
 				writer = new BufferedWriter(new FileWriter(tempFile));
 				writer.write(codeArea.getText());
 				writer.close();
+
+				currFile = tempFile;
 
 				String[] command = {"clingo", tempFile.getPath(), Integer.toString(numAnswers)};
 
@@ -207,7 +260,7 @@ public class MainFrame extends JFrame
 						if(lowerLine.contains("answer"))
 						{
 							numFoundAnswers += 1;
-							
+
 							if(numFoundAnswers > 1)
 								outputString += "\n" + line + "\n";
 							else
@@ -238,7 +291,7 @@ public class MainFrame extends JFrame
 			}
 		}	//end executeCode
 	}	//end ButtonListener
-	
+
 	private class SizeListener extends ComponentAdapter
 	{
 		public void componentResized(ComponentEvent e) 
