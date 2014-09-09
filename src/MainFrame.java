@@ -139,7 +139,7 @@ public class MainFrame extends JFrame
 		mainPanel.add(westPanel);
 		mainPanel.add(eastPanel);
 
-		this.setResizable(false);
+		this.setResizable(true);
 		this.addComponentListener(new SizeListener());
 		this.add(mainPanel);
 	}	//end initComponents
