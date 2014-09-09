@@ -35,7 +35,8 @@ public class MainFrame extends JFrame
 	private JFrame currFrame;
 	private File currCodeFile, currOutputFile;
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
-	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton;
+	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
+	clearOutputAreaButton;
 	private JTextArea codeArea, outputArea, notificationArea;
 	private JPanel mainPanel, eastPanel, westPanel, southeastPanel, 
 	southeastCenterPanel, northeastPanel;
@@ -103,7 +104,10 @@ public class MainFrame extends JFrame
 		westPanel.setLayout(new BorderLayout());
 		westPanel.add(new JLabel("Code:"), BorderLayout.NORTH);
 		westPanel.add(codePane, BorderLayout.CENTER);
-
+		
+		clearOutputAreaButton = new JButton("Clear Output");
+		clearOutputAreaButton.addActionListener(bListener);
+		
 		southeastCenterPanel = new JPanel();
 		southeastCenterPanel.add(new JLabel("Number of Solutions:"));
 		southeastCenterPanel.add(numSolutionsField);
@@ -114,6 +118,7 @@ public class MainFrame extends JFrame
 		southeastCenterPanel.add(saveOutputButton);
 		southeastCenterPanel.add(openExistingFileButton);
 		southeastCenterPanel.add(clearCodeAreaButton);
+		southeastCenterPanel.add(clearOutputAreaButton);
 
 		southeastPanel = new JPanel();
 		southeastPanel.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -164,6 +169,12 @@ public class MainFrame extends JFrame
 				currCodeFile = null;
 				codeArea.setText("");
 				notificationArea.setText("Cleared code area.");
+			}
+			else if(source.equals(clearOutputAreaButton))
+			{
+				currOutputFile = null;
+				outputArea.setText("");
+				notificationArea.setText("Cleared output area.");
 			}
 		}	//end actionPerformed
 
