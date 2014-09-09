@@ -13,7 +13,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
+import javax.swing.Timer;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -55,7 +61,7 @@ public class MainFrame extends JFrame
 		currOutputFile = null;
 		currCodeFile = null;
 		currFrame = this;
-
+		
 		saveCodeButton = new JButton("Save Code");
 		saveCodeButton.addActionListener(bListener);
 
@@ -246,7 +252,7 @@ public class MainFrame extends JFrame
 				saveCode();
 			}
 		}	//end saveOutputAs
-		
+
 		private void saveCode()
 		{
 			FileWriter fw;
@@ -297,7 +303,10 @@ public class MainFrame extends JFrame
 		}	//end saveFileAs
 
 		private void executeCode()
-		{
+		{			
+			long startTime = System.currentTimeMillis();
+			
+			String fiveSpaces = "     ";
 			int numAnswers;
 
 			try
@@ -334,6 +343,7 @@ public class MainFrame extends JFrame
 				String outputString = "";
 				String[] answers;
 				boolean answerSetFound = false;
+
 				int numFoundAnswers = 0;
 
 				while((line = br.readLine()) != null)
@@ -341,19 +351,51 @@ public class MainFrame extends JFrame
 					String lowerLine = line.toLowerCase();
 
 					if(answerSetFound)
-					{							
+					{
+						boolean tab = false;
 						answers = line.split(" ");
+						Collections.sort(Arrays.asList(answers));
+						String answerKey = null;
 
 						for(int i = 0; i < answers.length; i++)
 						{
-							if(i + 2 < answers.length)
+							String answer = answers[i];
+
+							if(answer.contains("("))
 							{
-								outputString += answers[i];
-								i += 1;
-								outputString += "\t" + answers[i] + "\n";
+								if(answerKey == null)
+								{
+									if(i > 0)
+										outputString += "\n\n";
+									
+									tab = false;
+									answerKey = answer.split("\\(")[0];
+								}
+								else
+								{
+									if(!answer.split("\\(")[0].equals(answerKey))
+									{
+										outputString += "\n\n";
+										answerKey = answer.split("\\(")[0];
+
+										tab = false;
+									}
+								}
+							}
+
+							if(tab)
+							{
+								outputString += fiveSpaces + answers[i] + "\n";
+								tab = false;
 							}
 							else
-								outputString += answers[i] + "\n";			
+							{
+								outputString += answers[i];	
+								tab = true;
+							}
+							
+							if(i == answers.length - 1)
+								outputString += "\n\n";
 						}
 
 						answerSetFound = false;
@@ -376,8 +418,10 @@ public class MainFrame extends JFrame
 					}
 				}
 
+				long elapsedTime = System.currentTimeMillis() - startTime;
 				outputArea.setText(outputString);
-				notificationArea.setText(" Completed executing code:\n" + numFoundAnswers + " Answers found");
+				notificationArea.setText(" Completed executing code in " + convertTime(elapsedTime)
+						+ "\n" + numFoundAnswers + " Answers found");
 			} 
 			catch (IOException e1) 
 			{
@@ -394,8 +438,23 @@ public class MainFrame extends JFrame
 				}
 			}
 		}	//end executeCode
+		
+		private String convertTime(long time)
+		{
+			String retVal = null;
+			
+			retVal = String.format("%ds.", 
+				    TimeUnit.MILLISECONDS.toSeconds(time) - 
+				    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time))
+				);
+			
+			if(retVal.equals("0s."))
+				retVal = time + "ms.";
+			
+			return retVal;
+		}	//end convertTime
 	}	//end ButtonListener
-
+	
 	private class SizeListener extends ComponentAdapter
 	{
 		public void componentResized(ComponentEvent e) 
