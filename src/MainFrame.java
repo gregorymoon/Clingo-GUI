@@ -26,16 +26,16 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 
+@SuppressWarnings("serial")
 public class MainFrame extends JFrame 
 {
 	private JScrollPane outputPane, codePane;
-	private JLabel notificationLabel;
 	private JTextField numSolutionsField;
 	private JFrame currFrame;
-	private File currCodeFile, tempFile;
-	private JButton executeButton, saveFileAsButton, clearCodeAreaButton,
-	saveOutputButton, openExistingFileButton, saveFileButton;
-	private JTextArea codeArea, outputArea;
+	private File currCodeFile, currOutputFile;
+	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
+	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton;
+	private JTextArea codeArea, outputArea, notificationArea;
 	private JPanel mainPanel, eastPanel, westPanel, southeastPanel, 
 	southeastCenterPanel, northeastPanel;
 
@@ -52,22 +52,24 @@ public class MainFrame extends JFrame
 	{
 		ButtonListener bListener = new ButtonListener();
 
-		tempFile = null;
+		currOutputFile = null;
 		currCodeFile = null;
 		currFrame = this;
-		
-		saveFileButton = new JButton("Save Code");
-		saveFileButton.addActionListener(bListener);
-		
+
+		saveCodeButton = new JButton("Save Code");
+		saveCodeButton.addActionListener(bListener);
+
 		openExistingFileButton = new JButton("Open Existing File");
 		openExistingFileButton.addActionListener(bListener);
 
 		saveOutputButton = new JButton("Save Output");
 		saveOutputButton.addActionListener(bListener);
 
-		notificationLabel = new JLabel();
-		notificationLabel.setForeground(Color.red);
-		notificationLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		notificationArea = new JTextArea();
+		notificationArea.setLineWrap(true);
+		notificationArea.setBackground(this.getBackground());
+		notificationArea.setForeground(Color.red);
+		notificationArea.setAlignmentX(JLabel.CENTER_ALIGNMENT);
 
 		numSolutionsField = new JTextField();
 		numSolutionsField.setText("0");
@@ -76,8 +78,11 @@ public class MainFrame extends JFrame
 		clearCodeAreaButton = new JButton("Clear Code");
 		clearCodeAreaButton.addActionListener(bListener);
 
-		saveFileAsButton = new JButton("Save Code As...");
-		saveFileAsButton.addActionListener(bListener);
+		saveOutputAsButton = new JButton("Save Output As...");
+		saveOutputAsButton.addActionListener(bListener);
+
+		saveCodeAsButton = new JButton("Save Code As...");
+		saveCodeAsButton.addActionListener(bListener);
 
 		executeButton = new JButton("Execute");
 		executeButton.addActionListener(bListener);
@@ -92,7 +97,7 @@ public class MainFrame extends JFrame
 
 		outputPane = new JScrollPane(outputArea);
 		codePane = new JScrollPane(codeArea);
-		
+
 		westPanel = new JPanel();
 		westPanel.setLayout(new BorderLayout());
 		westPanel.add(new JLabel("Code:"), BorderLayout.NORTH);
@@ -102,8 +107,9 @@ public class MainFrame extends JFrame
 		southeastCenterPanel.add(new JLabel("Number of Solutions:"));
 		southeastCenterPanel.add(numSolutionsField);
 		southeastCenterPanel.add(executeButton);
-		southeastCenterPanel.add(saveFileAsButton);
-		southeastCenterPanel.add(saveFileButton);
+		southeastCenterPanel.add(saveCodeAsButton);
+		southeastCenterPanel.add(saveCodeButton);
+		southeastCenterPanel.add(saveOutputAsButton);
 		southeastCenterPanel.add(saveOutputButton);
 		southeastCenterPanel.add(openExistingFileButton);
 		southeastCenterPanel.add(clearCodeAreaButton);
@@ -113,7 +119,7 @@ public class MainFrame extends JFrame
 		southeastPanel.setLayout(new BorderLayout());
 		southeastPanel.add(new JLabel("Controls:"), BorderLayout.NORTH);
 		southeastPanel.add(southeastCenterPanel, BorderLayout.CENTER);
-		southeastPanel.add(notificationLabel, BorderLayout.SOUTH);
+		southeastPanel.add(notificationArea, BorderLayout.SOUTH);
 
 		northeastPanel = new JPanel();
 		northeastPanel.setLayout(new BorderLayout());
@@ -143,16 +149,21 @@ public class MainFrame extends JFrame
 
 			if(source.equals(executeButton))
 				executeCode();
-			else if(source.equals(saveFileAsButton))
-				saveFileAs();
-			else if(source.equals(saveFileButton))
-				saveFile();
+			else if(source.equals(saveCodeAsButton))
+				saveCodeAs();
+			else if(source.equals(saveCodeButton))
+				saveCode();
 			else if(source.equals(openExistingFileButton))
 				openExistingFile();
+			else if(source.equals(saveOutputButton))
+				saveOutput();
+			else if (source.equals(saveOutputAsButton))
+				saveOutputAs();
 			else if(source.equals(clearCodeAreaButton))
 			{
 				currCodeFile = null;
 				codeArea.setText("");
+				notificationArea.setText("Cleared code area.");
 			}
 		}	//end actionPerformed
 
@@ -161,11 +172,11 @@ public class MainFrame extends JFrame
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
 			JFileChooser fc = new JFileChooser();
 			fc.setFileFilter(filter);
-			
+
 			if(fc.showOpenDialog(currFrame) == JFileChooser.APPROVE_OPTION)
 			{
 				currCodeFile = fc.getSelectedFile();
-				
+
 				try 
 				{
 					String textAreaString = "";
@@ -175,58 +186,116 @@ public class MainFrame extends JFrame
 					{
 						textAreaString += line + "\n";
 					}
-					
+
 					br.close();
 					codeArea.setText(textAreaString);
-					notificationLabel.setText("<html>Opened:<br>" + currCodeFile.getPath() + "<br>successfully.</html>");
+					notificationArea.setText("Opened:\n" + currCodeFile.getPath() + "\nsuccessfully.");
 
 				} catch (IOException e) {
 					e.printStackTrace();
-					notificationLabel.setText("<html>File at<br>" + currCodeFile.getPath() + "<br>not found.</html>");
+					notificationArea.setText("File at\n" + currCodeFile.getPath() + "\nnot found.");
 				}
 			}
-		}	//end openExistingRile
-		
-		private void saveFile()
+		}	//end openExistingFile
+
+		private void saveOutput()
 		{
 			FileWriter fw;
 			try 
 			{
-				if(currCodeFile == null || currCodeFile == tempFile)
+				if(currOutputFile == null)
 				{
-					currCodeFile = new File(System.getProperty("user.home") + File.separator
-							+ "Desktop" + File.separator + "temp.txt");
-					fw = new FileWriter(currCodeFile);
+					currOutputFile = new File(System.getProperty("user.home") + File.separator
+							+ "Desktop" + File.separator + "temp_output_filename.txt");
 				}
-				
-				fw = new FileWriter(currCodeFile);
 
-				fw.write(codeArea.getText());
-				fw.close();
-				
-				notificationLabel.setText("<html>Saved code to:<br>" + currCodeFile.getPath() + "<br>successfully.</html>");
+				if(currOutputFile.getName().contains(".txt"))
+				{
+					fw = new FileWriter(currOutputFile);
+
+					fw.write(outputArea.getText());
+					fw.close();
+
+					notificationArea.setText("Saved code to:\n" + currOutputFile.getPath() + "");
+				}
+				else
+					notificationArea.setText("Did not save code to:\n" + currOutputFile.getPath() 
+							+ "\nOnly \".txt\" files can be saved.");
+
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				notificationLabel.setText("<html>Unable to save code to<br>" + currCodeFile.getPath() + "<br>successfully.</html>");
+				notificationArea.setText("Unable to save code to\n" + currOutputFile.getPath() + "");
+			}
+		}	//end saveOutput
+
+		private void saveOutputAs()
+		{
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
+
+			JFileChooser fc = new JFileChooser();
+			fc.setFileFilter(filter);
+
+			if(currOutputFile == null)
+				fc.setSelectedFile(new File("temp_output_filename.txt"));
+			else
+				fc.setSelectedFile(currOutputFile);
+
+			if(fc.showSaveDialog(currFrame) == JFileChooser.APPROVE_OPTION)
+			{
+				currOutputFile = fc.getSelectedFile();	
+				saveCode();
+			}
+		}	//end saveOutputAs
+		
+		private void saveCode()
+		{
+			FileWriter fw;
+			try 
+			{
+				if(currCodeFile == null)
+				{
+					currCodeFile = new File(System.getProperty("user.home") + File.separator
+							+ "Desktop" + File.separator + "temp_code_filename.txt");
+				}
+
+				if(currCodeFile.getName().contains(".txt"))
+				{
+					fw = new FileWriter(currCodeFile);
+
+					fw.write(codeArea.getText());
+					fw.close();
+
+					notificationArea.setText("Saved code to:\n" + currCodeFile.getPath() + "");
+				}
+				else
+					notificationArea.setText("Did not save code to:\n" + currCodeFile.getPath() 
+							+ "\nOnly \".txt\" files can be saved.");
+
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				notificationArea.setText("Unable to save code to\n" + currCodeFile.getPath() + "");
 			}
 		}	//end saveFile
-		
-		private void saveFileAs()
+
+		private void saveCodeAs()
 		{
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("Text Files", "txt");
+
 			JFileChooser fc = new JFileChooser();
+			fc.setFileFilter(filter);
 
 			if(currCodeFile == null)
-				fc.setSelectedFile(new File("temp.txt"));
+				fc.setSelectedFile(new File("temp_code_filename.txt"));
 			else
 				fc.setSelectedFile(currCodeFile);
 
 			if(fc.showSaveDialog(currFrame) == JFileChooser.APPROVE_OPTION)
 			{
 				currCodeFile = fc.getSelectedFile();	
-				saveFile();
+				saveCode();
 			}
 		}	//end saveFileAs
-		
+
 		private void executeCode()
 		{
 			int numAnswers;
@@ -237,11 +306,12 @@ public class MainFrame extends JFrame
 			}
 			catch(NumberFormatException e)
 			{
-				notificationLabel.setText("<html>Please enter an integer for number of solutions.<br>"
-						+ "Defaulting to 0 (All solutions).</html>");
+				notificationArea.setText("Please enter an integer for number of solutions.\n"
+						+ "Defaulting to 0 (All solutions).");
 				numAnswers = 0;
 			}
 
+			File tempFile = null;
 			BufferedReader br = null;
 			ProcessBuilder pb = null;
 			Process proc = null;
@@ -253,8 +323,6 @@ public class MainFrame extends JFrame
 				writer = new BufferedWriter(new FileWriter(tempFile));
 				writer.write(codeArea.getText());
 				writer.close();
-
-				currCodeFile = tempFile;
 
 				String[] command = {"clingo", tempFile.getPath(), Integer.toString(numAnswers)};
 
@@ -309,6 +377,7 @@ public class MainFrame extends JFrame
 				}
 
 				outputArea.setText(outputString);
+				notificationArea.setText(" Completed executing code:\n" + numFoundAnswers + " Answers found");
 			} 
 			catch (IOException e1) 
 			{

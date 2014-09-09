@@ -98,8 +98,6 @@ public class ClingoGUI
 	
 	private static class DialogListener extends WindowAdapter
 	{
-
-		@Override
 		public void windowClosing(WindowEvent e) 
 		{
 			System.exit(0);
