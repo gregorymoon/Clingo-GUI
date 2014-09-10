@@ -3,6 +3,9 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,7 +34,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class MainFrame extends JFrame 
 {
 	private JScrollPane outputPane, codePane;
-	private JTextField numSolutionsField;
+	private JTextField numSolutionsField, timeLimitField;
 	private JFrame currFrame;
 	private File currCodeFile, currOutputFile;
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
@@ -46,7 +49,7 @@ public class MainFrame extends JFrame
 		initComponents();
 
 		this.setTitle("Clingo GUI - " + ver);
-		this.setSize(690, 580);
+		this.setSize(1020, 790);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}	//end MainFrame Constructor
 
@@ -72,9 +75,13 @@ public class MainFrame extends JFrame
 		notificationArea.setBackground(this.getBackground());
 		notificationArea.setForeground(Color.red);
 		notificationArea.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-
+		
+		timeLimitField = new JTextField();
+		timeLimitField.setText("5");
+		timeLimitField.setColumns(5);
+		
 		numSolutionsField = new JTextField();
-		numSolutionsField.setText("0");
+		numSolutionsField.setText("1");
 		numSolutionsField.setColumns(5);
 
 		clearCodeAreaButton = new JButton("Clear Code");
@@ -111,6 +118,8 @@ public class MainFrame extends JFrame
 		southeastCenterPanel = new JPanel();
 		southeastCenterPanel.add(new JLabel("Number of Solutions:"));
 		southeastCenterPanel.add(numSolutionsField);
+		southeastCenterPanel.add(new JLabel("Time Limit (seconds): "));
+		southeastCenterPanel.add(timeLimitField);
 		southeastCenterPanel.add(executeButton);
 		southeastCenterPanel.add(saveCodeAsButton);
 		southeastCenterPanel.add(saveCodeButton);
@@ -142,10 +151,20 @@ public class MainFrame extends JFrame
 		mainPanel.add(westPanel);
 		mainPanel.add(eastPanel);
 
+		this.addComponentListener(new SizeListener());
 		this.setResizable(true);
 		this.add(mainPanel);
 	}	//end initComponents
-
+	
+	private class SizeListener extends ComponentAdapter
+	{
+		public void componentResized(ComponentEvent e) 
+		{
+			System.out.println("Height: " + e.getComponent().getHeight());
+			System.out.println("Width: " + e.getComponent().getWidth());
+		}
+	}
+	
 	private class ButtonListener implements ActionListener
 	{
 		public void actionPerformed(ActionEvent e)
@@ -312,7 +331,9 @@ public class MainFrame extends JFrame
 			long startTime = System.currentTimeMillis();
 			
 			String fiveSpaces = "     ";
-			int numAnswers;
+			String errMsg = "";
+			int numAnswers, timeLimit;
+			boolean errCaught = false;
 
 			try
 			{
@@ -320,9 +341,25 @@ public class MainFrame extends JFrame
 			}
 			catch(NumberFormatException e)
 			{
-				notificationArea.setText("Please enter an integer for number of solutions.\n"
-						+ "Defaulting to 0 (All solutions).");
-				numAnswers = 0;
+				errMsg = "\n\nPlease enter an integer for number of solutions.\n"
+						+ "Defaulting to 1 solution.";
+				numAnswers = 1;
+				errCaught = true;
+			}
+			
+			try
+			{
+				timeLimit = Integer.parseInt(timeLimitField.getText());
+			}
+			catch(NumberFormatException e)
+			{
+				if(errCaught)
+					errMsg = "\n\nPlease enter an integer for number of solutions and time limit.\n"
+						+ "Defaulting to 1 solution and 5 second time limit.";
+				else
+					errMsg = "\n\nPlease enter an integer for time limit.\n"
+							+ "Defaulting to 5 seconds.";
+				timeLimit = 5;
 			}
 
 			File tempFile = null;
@@ -338,7 +375,8 @@ public class MainFrame extends JFrame
 				writer.write(codeArea.getText());
 				writer.close();
 
-				String[] command = {"clingo", tempFile.getPath(), Integer.toString(numAnswers)};
+				String[] command = {"clingo", tempFile.getPath(), "-n " + Integer.toString(numAnswers),
+						"--time-limit=" + timeLimit};
 
 				pb = new ProcessBuilder(command);
 				proc = pb.start();
@@ -425,8 +463,8 @@ public class MainFrame extends JFrame
 
 				long elapsedTime = System.currentTimeMillis() - startTime;
 				outputArea.setText(outputString);
-				notificationArea.setText(" Completed executing code in " + convertTime(elapsedTime)
-						+ "\n" + numFoundAnswers + " Answers found");
+				notificationArea.setText("Completed executing code in " + convertTime(elapsedTime)
+						+ "\n" + numFoundAnswers + " Answers found" + errMsg);
 			} 
 			catch (IOException e1) 
 			{
