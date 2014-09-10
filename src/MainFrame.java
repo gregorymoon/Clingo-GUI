@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -139,19 +140,28 @@ public class MainFrame extends JFrame
 		clearOutputAreaButton = new JButton("Clear Output");
 		clearOutputAreaButton.addActionListener(bListener);
 		
+		JPanel sCWestPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		sCWestPanel.add(new JLabel("Number of Solutions:"));
+		sCWestPanel.add(numSolutionsField);
+		sCWestPanel.add(new JLabel("Time Limit (seconds): "));
+		sCWestPanel.add(timeLimitField);
+		sCWestPanel.add(executeButton);
+		sCWestPanel.add(clearCodeAreaButton);
+		sCWestPanel.add(clearOutputAreaButton);
+
+		JPanel sCEastPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		sCEastPanel.setAlignmentX(LEFT_ALIGNMENT);
+		sCEastPanel.add(openExistingFileButton);
+		sCEastPanel.add(saveCodeButton);
+		sCEastPanel.add(saveCodeAsButton);
+		sCEastPanel.add(saveOutputButton);
+		sCEastPanel.add(saveOutputAsButton);
+		
+		
 		southeastCenterPanel = new JPanel();
-		southeastCenterPanel.add(new JLabel("Number of Solutions:"));
-		southeastCenterPanel.add(numSolutionsField);
-		southeastCenterPanel.add(new JLabel("Time Limit (seconds): "));
-		southeastCenterPanel.add(timeLimitField);
-		southeastCenterPanel.add(executeButton);
-		southeastCenterPanel.add(saveCodeAsButton);
-		southeastCenterPanel.add(saveCodeButton);
-		southeastCenterPanel.add(saveOutputAsButton);
-		southeastCenterPanel.add(saveOutputButton);
-		southeastCenterPanel.add(openExistingFileButton);
-		southeastCenterPanel.add(clearCodeAreaButton);
-		southeastCenterPanel.add(clearOutputAreaButton);
+		southeastCenterPanel.setLayout(new GridLayout(0, 2));
+		southeastCenterPanel.add(sCWestPanel);
+		southeastCenterPanel.add(sCEastPanel);
 
 		southeastPanel = new JPanel();
 		southeastPanel.setBorder(BorderFactory.createLineBorder(Color.black));
