@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,25 +23,28 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame 
 {
-	private JScrollPane outputPane, codePane;
+	private JScrollPane outputPane, codePane, lineNumberPane;
 	private JTextField numSolutionsField, timeLimitField;
 	private JFrame currFrame;
 	private File currCodeFile, currOutputFile;
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
-	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
-	clearOutputAreaButton;
-	private JTextArea codeArea, outputArea, notificationArea;
+		saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
+		clearOutputAreaButton;
+	private JTextArea codeArea, outputArea, notificationArea, lineNumberArea;
 	private JPanel mainPanel, eastPanel, westPanel, southeastPanel, 
-	southeastCenterPanel, northeastPanel;
+	southeastCenterPanel, northeastPanel, codeDisplayPanel;
 
 	public MainFrame(String ver)
 	{		
@@ -54,7 +56,7 @@ public class MainFrame extends JFrame
 	}	//end MainFrame Constructor
 
 	private void initComponents()
-	{
+	{	
 		ButtonListener bListener = new ButtonListener();
 
 		currOutputFile = null;
@@ -103,14 +105,36 @@ public class MainFrame extends JFrame
 
 		codeArea = new JTextArea();
 		codeArea.setBorder(BorderFactory.createLineBorder(Color.black));
+		codeArea.getDocument().addDocumentListener(new AreaListener());
 
+		lineNumberArea = new JTextArea();
+		lineNumberArea.setBorder(BorderFactory.createLineBorder(Color.black));
+		lineNumberArea.setBackground(currFrame.getBackground());
+		lineNumberArea.setEditable(false);
+		lineNumberArea.setColumns(2);
+		lineNumberArea.setAlignmentX(RIGHT_ALIGNMENT);	
+		
 		outputPane = new JScrollPane(outputArea);
+		
 		codePane = new JScrollPane(codeArea);
-
+		
+		lineNumberPane = new JScrollPane(lineNumberArea);
+		lineNumberPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		lineNumberPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		JScrollBar sBarCodePane = codePane.getVerticalScrollBar();
+		JScrollBar sBarLineNumPane = lineNumberPane.getVerticalScrollBar();
+		sBarLineNumPane.setModel(sBarCodePane.getModel());
+		
+		codeDisplayPanel = new JPanel();
+		codeDisplayPanel.setLayout(new BorderLayout());
+		codeDisplayPanel.add(codePane, BorderLayout.CENTER);
+		codeDisplayPanel.add(lineNumberPane, BorderLayout.WEST);
+		
 		westPanel = new JPanel();
 		westPanel.setLayout(new BorderLayout());
 		westPanel.add(new JLabel("Code:"), BorderLayout.NORTH);
-		westPanel.add(codePane, BorderLayout.CENTER);
+		westPanel.add(codeDisplayPanel, BorderLayout.CENTER);
 		
 		clearOutputAreaButton = new JButton("Clear Output");
 		clearOutputAreaButton.addActionListener(bListener);
@@ -155,6 +179,31 @@ public class MainFrame extends JFrame
 		this.setResizable(true);
 		this.add(mainPanel);
 	}	//end initComponents
+	
+	private class AreaListener implements DocumentListener
+	{	
+		public void insertUpdate(DocumentEvent e) 
+		{
+			updateLineNums();
+		}
+
+		public void removeUpdate(DocumentEvent e) 
+		{	
+			updateLineNums();
+		}
+
+		public void changedUpdate(DocumentEvent e) 
+		{
+			updateLineNums();
+		}
+		
+		private void updateLineNums()
+		{
+			lineNumberArea.setText("");
+			for(int i = 0; i < codeArea.getLineCount(); i++)
+				lineNumberArea.append(i+1 + "\n");
+		}
+	}	//end AreaListener
 	
 	private class SizeListener extends ComponentAdapter
 	{

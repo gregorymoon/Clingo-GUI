@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 
 public class ClingoGUI 
 {
-	final private static String downloadLink = "http://sourceforge.net/projects/potassco/files/clingo/4.4.0/";
+	final private static String downloadLink = "http://sourceforge.net/projects/potassco/files/clingo/";
 
 	public static void main(String[] args) throws IOException
 	{
