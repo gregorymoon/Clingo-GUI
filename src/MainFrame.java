@@ -111,7 +111,7 @@ public class MainFrame extends JFrame
 		lineNumberArea.setBorder(BorderFactory.createLineBorder(Color.black));
 		lineNumberArea.setBackground(currFrame.getBackground());
 		lineNumberArea.setEditable(false);
-		lineNumberArea.setColumns(2);
+		lineNumberArea.setColumns(3);
 		lineNumberArea.setAlignmentX(RIGHT_ALIGNMENT);	
 		
 		outputPane = new JScrollPane(outputArea);
@@ -298,7 +298,7 @@ public class MainFrame extends JFrame
 					notificationArea.setText("Saved code to:\n" + currOutputFile.getPath() + "");
 				}
 				else
-					notificationArea.setText("Did not save code to:\n" + currOutputFile.getPath() 
+					notificationArea.setText("Did not save to:\n" + currOutputFile.getPath() 
 							+ "\nOnly \".txt\" files can be saved.");
 
 			} catch (IOException e1) {
