@@ -12,6 +12,7 @@ import javax.swing.event.DocumentListener;
 @SuppressWarnings("serial")
 public class CodePanel extends JPanel implements DocumentListener
 {
+	//declare instance variables
 	public JTextArea codeArea, lineNumberArea;
 	
 	public CodePanel()

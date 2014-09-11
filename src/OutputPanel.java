@@ -11,6 +11,7 @@ import javax.swing.JTextArea;
 @SuppressWarnings("serial")
 public class OutputPanel extends JPanel 
 {
+	//declare instance variables
 	public JTextArea outputArea;
 	
 	public OutputPanel()

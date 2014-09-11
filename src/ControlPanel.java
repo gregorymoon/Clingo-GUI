@@ -29,6 +29,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements ActionListener
 {
+	//declare instance variables
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
 		saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
 		clearOutputAreaButton;
