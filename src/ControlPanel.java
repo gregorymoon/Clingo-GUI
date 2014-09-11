@@ -29,24 +29,27 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 @SuppressWarnings("serial")
 public class ControlPanel extends JPanel implements ActionListener
 {
+	//declare final variables
+	private final String DEFAULT_TIME_LIMIT = "5", DEFAULT_NUM_ANSWERS = "0";
+	
 	//declare instance variables
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
-		saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
-		clearOutputAreaButton;
+	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
+	clearOutputAreaButton;
 	private JTextField numSolutionsField, timeLimitField;
 	private JTextArea notificationArea;
 
 	public ControlPanel()
 	{
 		initComponents();
-	}
+	}	//end ControlPanel constructor
 
 	private void initComponents()
 	{	
 		//set up buttons
 		clearOutputAreaButton = new JButton("Clear Output");
 		clearOutputAreaButton.addActionListener(this);
-		
+
 		saveCodeButton = new JButton("Save Code");
 		saveCodeButton.addActionListener(this);
 
@@ -77,11 +80,11 @@ public class ControlPanel extends JPanel implements ActionListener
 
 		//set up text fields
 		timeLimitField = new JTextField();
-		timeLimitField.setText("5");
+		timeLimitField.setText(DEFAULT_TIME_LIMIT);
 		timeLimitField.setColumns(5);
 
 		numSolutionsField = new JTextField();
-		numSolutionsField.setText("0");
+		numSolutionsField.setText(DEFAULT_NUM_ANSWERS);
 		numSolutionsField.setColumns(5);
 
 		//set up panels
@@ -101,7 +104,7 @@ public class ControlPanel extends JPanel implements ActionListener
 		eastPanel.add(saveCodeAsButton);
 		eastPanel.add(saveOutputButton);
 		eastPanel.add(saveOutputAsButton);
-		
+
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridLayout(0, 2));
 		mainPanel.add(westPanel);
@@ -113,36 +116,6 @@ public class ControlPanel extends JPanel implements ActionListener
 		this.add(new JLabel("Controls:"), BorderLayout.NORTH);
 		this.add(mainPanel, BorderLayout.CENTER);
 		this.add(notificationArea, BorderLayout.SOUTH);
-	}
-
-	public void actionPerformed(ActionEvent e) 
-	{
-		JButton source = (JButton)e.getSource();
-
-		if(source.equals(executeButton))
-			executeCode();
-		else if(source.equals(saveCodeAsButton))
-			saveCodeAs();
-		else if(source.equals(saveCodeButton))
-			saveCode();
-		else if(source.equals(openExistingFileButton))
-			openExistingFile();
-		else if(source.equals(saveOutputButton))
-			saveOutput();
-		else if (source.equals(saveOutputAsButton))
-			saveOutputAs();
-		else if(source.equals(clearCodeAreaButton))
-		{
-			MainFrame.currCodeFile = null;
-			MainFrame.codePanel.codeArea.setText("");
-			notificationArea.setText("Cleared code area.");
-		}
-		else if(source.equals(clearOutputAreaButton))
-		{
-			MainFrame.currOutputFile = null;
-			MainFrame.oPanel.outputArea.setText("");
-			notificationArea.setText("Cleared output area.");
-		}		
 	}
 
 	private void openExistingFile()
@@ -444,4 +417,38 @@ public class ControlPanel extends JPanel implements ActionListener
 
 		return retVal;
 	}	//end convertTime
+	
+	//
+	//Implement ActionListener methods
+	//
+	
+	public void actionPerformed(ActionEvent e) 
+	{
+		JButton source = (JButton)e.getSource();
+
+		if(source.equals(executeButton))
+			executeCode();
+		else if(source.equals(saveCodeAsButton))
+			saveCodeAs();
+		else if(source.equals(saveCodeButton))
+			saveCode();
+		else if(source.equals(openExistingFileButton))
+			openExistingFile();
+		else if(source.equals(saveOutputButton))
+			saveOutput();
+		else if (source.equals(saveOutputAsButton))
+			saveOutputAs();
+		else if(source.equals(clearCodeAreaButton))
+		{
+			MainFrame.currCodeFile = null;
+			MainFrame.codePanel.codeArea.setText("");
+			notificationArea.setText("Cleared code area.");
+		}
+		else if(source.equals(clearOutputAreaButton))
+		{
+			MainFrame.currOutputFile = null;
+			MainFrame.oPanel.outputArea.setText("");
+			notificationArea.setText("Cleared output area.");
+		}		
+	}
 }	//end ControlPanel

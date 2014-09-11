@@ -17,7 +17,7 @@ public class OutputPanel extends JPanel
 	public OutputPanel()
 	{
 		initComponents();
-	}
+	}	//end OutputPanel constructor
 	
 	private void initComponents()
 	{

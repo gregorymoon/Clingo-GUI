@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 
 public class ClingoGUI 
 {
-	final private static String downloadLink = "http://sourceforge.net/projects/potassco/files/clingo/";
+	final private static String DOWNLOAD_LINK = "http://sourceforge.net/projects/potassco/files/clingo/";
 
 	public static void main(String[] args) throws IOException
 	{
@@ -70,7 +70,7 @@ public class ClingoGUI
 		{
 			return null;
 		}	
-	}
+	}	//end getClingoVer
 	
 	private static class ClickListener extends MouseAdapter
 	{
@@ -78,22 +78,21 @@ public class ClingoGUI
 		{
 			try 
 			{
-				java.awt.Desktop.getDesktop().browse(new URI(downloadLink));
+				java.awt.Desktop.getDesktop().browse(new URI(DOWNLOAD_LINK));
 				System.exit(0);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			} catch (URISyntaxException e1) {
 				e1.printStackTrace();
-			}
-			
-		}
+			}	
+		}	//end mouseClicked
 		
 		public void mouseEntered(MouseEvent e)
 		{
 			JLabel label = (JLabel)e.getSource();
 			
 			label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));;
-		}
+		}	//end mouseEntered
 	}	//end ClickListener
 	
 	private static class DialogListener extends WindowAdapter
@@ -101,6 +100,6 @@ public class ClingoGUI
 		public void windowClosing(WindowEvent e) 
 		{
 			System.exit(0);
-		}
+		}	//end windowClosing
 	}	//end DialogListener
 }	//end ClingoGUI

@@ -18,7 +18,7 @@ public class CodePanel extends JPanel implements DocumentListener
 	public CodePanel()
 	{
 		initComponents();
-	}
+	}	//end CodePanel constructor
 	
 	private void initComponents()
 	{
@@ -51,25 +51,29 @@ public class CodePanel extends JPanel implements DocumentListener
 		this.add(lineNumberPane, BorderLayout.WEST);
 	}
 	
-	public void insertUpdate(DocumentEvent e) 
-	{
-		updateLineNums();
-	}
-
-	public void removeUpdate(DocumentEvent e) 
-	{	
-		updateLineNums();
-	}
-
-	public void changedUpdate(DocumentEvent e) 
-	{
-		updateLineNums();
-	}
-	
 	private void updateLineNums()
 	{
 		lineNumberArea.setText("");
 		for(int i = 0; i < codeArea.getLineCount(); i++)
 			lineNumberArea.append(i+1 + "\n");
-	}
+	}	//end updateLineNums
+	
+	//
+	//Implement DocumentListener methods
+	//
+	
+	public void insertUpdate(DocumentEvent e) 
+	{
+		updateLineNums();
+	}	//end insertUpdate
+
+	public void removeUpdate(DocumentEvent e) 
+	{	
+		updateLineNums();
+	}	//end removeUpdate
+
+	public void changedUpdate(DocumentEvent e) 
+	{
+		updateLineNums();
+	}	//end changedUpdate
 }
