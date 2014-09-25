@@ -31,10 +31,15 @@ public class AnswerSet
 		keys.get(key).add(stringToAdd);
 	}
 
+	public String getName()
+	{
+		return name;
+	}
+	
 	public String toString()
 	{
 		String fiveSpaces = "     ";
-		ArrayList<String> currList, minifiedList;
+		ArrayList<String> currList;
 		String outputString = "";
 
 		outputString += name + "\n";

@@ -32,7 +32,7 @@ public class ControlPanel extends JPanel implements ActionListener
 {
 	//declare final variables
 	private final String DEFAULT_TIME_LIMIT = "5", DEFAULT_NUM_ANSWERS = "0";
-	
+
 	//declare instance variables
 	private JButton executeButton, saveCodeAsButton, clearCodeAreaButton,
 	saveOutputButton, openExistingFileButton, saveCodeButton, saveOutputAsButton,
@@ -254,14 +254,15 @@ public class ControlPanel extends JPanel implements ActionListener
 	{			
 		boolean errCaught = false, satisfiable = false;
 
+		MainFrame.oPanel.answerBox.removeAllItems();
 		AnswerSet.resetHiddenKeys();
 		findHiddenKeys();
-		
+
 		long startTime = System.currentTimeMillis();
 
 		String errMsg = "";
 		int numAnswers, timeLimit;
-		
+
 		try
 		{
 			numAnswers = Integer.parseInt(numSolutionsField.getText());
@@ -312,17 +313,14 @@ public class ControlPanel extends JPanel implements ActionListener
 			br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 
 			String line = null;
-			String outputString = "";
 			String[] answers;
 			boolean answerSetFound = false;
-
-			int numFoundAnswers = 0;
 
 			while((line = br.readLine()) != null)
 			{
 				if(!satisfiable && line.toLowerCase().equals("satisfiable"))
 					satisfiable = true;
-				
+
 				String lowerLine = line.toLowerCase();
 
 				if(answerSetFound)
@@ -351,7 +349,7 @@ public class ControlPanel extends JPanel implements ActionListener
 								}
 							}
 						}
-						
+
 						if(answerKey != null)
 							currSet.addToList(answerKey, answer);
 						else
@@ -368,23 +366,26 @@ public class ControlPanel extends JPanel implements ActionListener
 						answerSets.add(currSet);
 						answerSetFound = true;	
 					}
-					
+
 					System.out.println(line);
 				}
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			
+
 			if(satisfiable)
 			{
-				for(AnswerSet set : answerSets)
-					outputString += set.toString();
-			
-				MainFrame.oPanel.outputArea.setText(outputString);
+				if(answerSets.size() > 1)
+				{
+					for(AnswerSet set : answerSets)
+						MainFrame.oPanel.answerBox.addItem(set.getName());
+				}
 			}
 			else
 				MainFrame.oPanel.outputArea.setText("Your program is not satisfiable.\nCheck your syntax");
-			
+
+			MainFrame.oPanel.answerBox.addItem("All");
+			MainFrame.oPanel.answerBox.setSelectedItem("All");
 			notificationArea.setText("Completed executing code in " + convertTime(elapsedTime)
 					+ "\n" + answerSets.size() + " Answers found" + errMsg);
 		} 
@@ -403,7 +404,7 @@ public class ControlPanel extends JPanel implements ActionListener
 			}
 		}
 	}	//end executeCode
-	
+
 	private String convertTime(long time)
 	{
 		String retVal = null;
@@ -418,11 +419,11 @@ public class ControlPanel extends JPanel implements ActionListener
 
 		return retVal;
 	}	//end convertTime
-	
+
 	private void findHiddenKeys()
 	{		
 		String[] text = MainFrame.codePanel.codeArea.getText().split("\n");
-		
+
 		for(String line : text)
 		{	
 			if(line.toLowerCase().contains("%hide"))
@@ -432,11 +433,15 @@ public class ControlPanel extends JPanel implements ActionListener
 			}
 		}
 	}
-	
+
+	public ArrayList<AnswerSet> getAnswerSets()
+	{
+		return answerSets;
+	}
 	//
 	//Implement ActionListener methods
 	//
-	
+
 	public void actionPerformed(ActionEvent e) 
 	{
 		JButton source = (JButton)e.getSource();
