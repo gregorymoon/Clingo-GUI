@@ -19,7 +19,6 @@ public class AnswerSet
 
 	public void addKey(String key)
 	{
-		System.out.println("Added key: " + key);
 		ArrayList<String> list = new ArrayList<String>();
 
 		keys.put(key, list);
@@ -27,7 +26,6 @@ public class AnswerSet
 
 	public void addToList(String key, String stringToAdd)
 	{
-		System.out.println("Adding to list with key " + key);
 		keys.get(key).add(stringToAdd);
 	}
 

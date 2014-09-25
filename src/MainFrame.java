@@ -60,8 +60,7 @@ public class MainFrame extends JFrame implements ComponentListener
 
 	public void componentResized(ComponentEvent e) 
 	{
-		System.out.println("Height: " + e.getComponent().getHeight());
-		System.out.println("Width: " + e.getComponent().getWidth());
+
 	}	//end componentResized
 
 	public void componentMoved(ComponentEvent e) {}

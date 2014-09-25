@@ -367,7 +367,6 @@ public class ControlPanel extends JPanel implements ActionListener
 						answerSetFound = true;	
 					}
 
-					System.out.println(line);
 				}
 			}
 
