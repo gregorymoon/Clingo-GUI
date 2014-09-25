@@ -379,12 +379,13 @@ public class ControlPanel extends JPanel implements ActionListener
 					for(AnswerSet set : answerSets)
 						MainFrame.oPanel.answerBox.addItem(set.getName());
 				}
+				
+				MainFrame.oPanel.answerBox.addItem("All");
+				MainFrame.oPanel.answerBox.setSelectedItem("All");
 			}
 			else
 				MainFrame.oPanel.outputArea.setText("Your program is not satisfiable.\nCheck your syntax");
 
-			MainFrame.oPanel.answerBox.addItem("All");
-			MainFrame.oPanel.answerBox.setSelectedItem("All");
 			notificationArea.setText("Completed executing code in " + convertTime(elapsedTime)
 					+ "\n" + answerSets.size() + " Answers found" + errMsg);
 		} 
