@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +39,8 @@ public class ControlPanel extends JPanel implements ActionListener
 	clearOutputAreaButton;
 	private JTextField numSolutionsField, timeLimitField;
 	private JTextArea notificationArea;
+	private ArrayList<AnswerSet> answerSets;
+
 
 	public ControlPanel()
 	{
@@ -249,13 +252,16 @@ public class ControlPanel extends JPanel implements ActionListener
 
 	private void executeCode()
 	{			
+		boolean errCaught = false, satisfiable = false;
+
+		AnswerSet.resetHiddenKeys();
+		findHiddenKeys();
+		
 		long startTime = System.currentTimeMillis();
 
-		String fiveSpaces = "     ";
 		String errMsg = "";
 		int numAnswers, timeLimit;
-		boolean errCaught = false;
-
+		
 		try
 		{
 			numAnswers = Integer.parseInt(numSolutionsField.getText());
@@ -288,6 +294,8 @@ public class ControlPanel extends JPanel implements ActionListener
 		ProcessBuilder pb = null;
 		Process proc = null;
 		BufferedWriter writer = null;
+		AnswerSet currSet = null;
+		answerSets = new ArrayList<AnswerSet>();
 
 		try 
 		{
@@ -312,11 +320,13 @@ public class ControlPanel extends JPanel implements ActionListener
 
 			while((line = br.readLine()) != null)
 			{
+				if(!satisfiable && line.toLowerCase().equals("satisfiable"))
+					satisfiable = true;
+				
 				String lowerLine = line.toLowerCase();
 
 				if(answerSetFound)
 				{
-					boolean tab = false;
 					answers = line.split(" ");
 					Collections.sort(Arrays.asList(answers));
 					String answerKey = null;
@@ -329,37 +339,23 @@ public class ControlPanel extends JPanel implements ActionListener
 						{
 							if(answerKey == null)
 							{
-								if(i > 0)
-									outputString += "\n\n";
-
-								tab = false;
 								answerKey = answer.split("\\(")[0];
+								currSet.addKey(answerKey);
 							}
 							else
 							{
 								if(!answer.split("\\(")[0].equals(answerKey))
 								{
-									outputString += "\n\n";
 									answerKey = answer.split("\\(")[0];
-
-									tab = false;
+									currSet.addKey(answerKey);
 								}
 							}
 						}
-
-						if(tab)
-						{
-							outputString += fiveSpaces + answers[i] + "\n";
-							tab = false;
-						}
+						
+						if(answerKey != null)
+							currSet.addToList(answerKey, answer);
 						else
-						{
-							outputString += answers[i];	
-							tab = true;
-						}
-
-						if(i == answers.length - 1)
-							outputString += "\n\n";
+							currSet.addToList(AnswerSet.NO_CATEGORY, answer);
 					}
 
 					answerSetFound = false;
@@ -368,24 +364,29 @@ public class ControlPanel extends JPanel implements ActionListener
 				{
 					if(lowerLine.contains("answer"))
 					{
-						numFoundAnswers += 1;
-
-						if(numFoundAnswers > 1)
-							outputString += "\n" + line + "\n";
-						else
-							outputString += line + "\n";
-
+						currSet = new AnswerSet(line);
+						answerSets.add(currSet);
 						answerSetFound = true;	
 					}
-					else
-						outputString += line + "\n";
+					
+					System.out.println(line);
 				}
 			}
 
 			long elapsedTime = System.currentTimeMillis() - startTime;
-			MainFrame.oPanel.outputArea.setText(outputString);
+			
+			if(satisfiable)
+			{
+				for(AnswerSet set : answerSets)
+					outputString += set.toString();
+			
+				MainFrame.oPanel.outputArea.setText(outputString);
+			}
+			else
+				MainFrame.oPanel.outputArea.setText("Your program is not satisfiable.\nCheck your syntax");
+			
 			notificationArea.setText("Completed executing code in " + convertTime(elapsedTime)
-					+ "\n" + numFoundAnswers + " Answers found" + errMsg);
+					+ "\n" + answerSets.size() + " Answers found" + errMsg);
 		} 
 		catch (IOException e1) 
 		{
@@ -402,7 +403,7 @@ public class ControlPanel extends JPanel implements ActionListener
 			}
 		}
 	}	//end executeCode
-
+	
 	private String convertTime(long time)
 	{
 		String retVal = null;
@@ -417,6 +418,20 @@ public class ControlPanel extends JPanel implements ActionListener
 
 		return retVal;
 	}	//end convertTime
+	
+	private void findHiddenKeys()
+	{		
+		String[] text = MainFrame.codePanel.codeArea.getText().split("\n");
+		
+		for(String line : text)
+		{	
+			if(line.toLowerCase().contains("%hide"))
+			{
+				String keyToHide = line.split(" ")[1];
+				AnswerSet.addToHiddenKeys(keyToHide);
+			}
+		}
+	}
 	
 	//
 	//Implement ActionListener methods
