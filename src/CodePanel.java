@@ -1,5 +1,6 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.Stack;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -14,6 +15,9 @@ public class CodePanel extends JPanel implements DocumentListener
 {
 	//declare instance variables
 	public JTextArea codeArea, lineNumberArea;
+	private int numLines, currLineNum;
+	private Stack<String> stringsToDelete;
+	
 	
 	public CodePanel()
 	{
@@ -22,6 +26,11 @@ public class CodePanel extends JPanel implements DocumentListener
 	
 	private void initComponents()
 	{
+		numLines = 0;
+		currLineNum = 0;
+		
+		stringsToDelete = new Stack<String>();
+		
 		//set up text areas
 		codeArea = new JTextArea();
 		codeArea.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -53,9 +62,39 @@ public class CodePanel extends JPanel implements DocumentListener
 	
 	private void updateLineNums()
 	{
-		lineNumberArea.setText("");
-		for(int i = 0; i < codeArea.getLineCount(); i++)
-			lineNumberArea.append(i+1 + "\n");
+		String stringToAdd = null;
+		
+		if(codeArea.getLineCount() > numLines)
+		{
+			int diff = codeArea.getLineCount() - numLines;
+			
+			while(diff > 0)
+			{
+	 			currLineNum++;
+	 			diff--;
+				stringToAdd = currLineNum + "\n";
+				lineNumberArea.append(stringToAdd);
+				stringsToDelete.push(stringToAdd);
+			}
+			
+		}
+		else if(codeArea.getLineCount() < numLines)
+		{
+			String text = lineNumberArea.getText();
+			int diff = numLines - codeArea.getLineCount();
+			
+			while(diff > 0)
+			{
+				currLineNum--;
+				diff--;
+				text = text.replaceAll(stringsToDelete.pop(), "");
+			}
+			
+			lineNumberArea.setText(text);
+		}
+			
+			
+		numLines = codeArea.getLineCount();
 	}	//end updateLineNums
 	
 	//
@@ -64,16 +103,19 @@ public class CodePanel extends JPanel implements DocumentListener
 	
 	public void insertUpdate(DocumentEvent e) 
 	{
-		updateLineNums();
+		if(codeArea.getLineCount() != numLines)
+			updateLineNums();
 	}	//end insertUpdate
 
 	public void removeUpdate(DocumentEvent e) 
 	{	
-		updateLineNums();
+		if(codeArea.getLineCount() != numLines)
+			updateLineNums();
 	}	//end removeUpdate
 
 	public void changedUpdate(DocumentEvent e) 
 	{
-		updateLineNums();
+		if(codeArea.getLineCount() != numLines)
+			updateLineNums();
 	}	//end changedUpdate
 }
